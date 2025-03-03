@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Step Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+        body {
+            background-color: #f0f6ff;
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .plan-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .plan-card:hover {
+            border-color: #483EFF;
+        }
+
+        .plan-card.selected {
+            border-color: #483EFF;
+            background-color: #f8f9ff;
+        }
+
+        .addon-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .addon-card:hover {
+            border-color: #483EFF;
+        }
+
+        .addon-card.selected {
+            border-color: #483EFF;
+            background-color: #f8f9ff;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 38px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #022959;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(18px);
+        }
+
+        .error {
+            border-color: #ed3548 !important;
+        }
+
+        .error-message {
+            display: none;
+            color: #ed3548;
+            font-size: 14px;
+        }
+
+        .sidebar-bg {
+            background-color: #483EFF;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cdefs%3E%3Cpattern id='pattern' width='100%25' height='100%25' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='20%25' cy='110%25' r='30%25' fill='%23ffaf7e' opacity='0.7'/%3E%3Ccircle cx='100%25' cy='60%25' r='30%25' fill='%23f9818d' opacity='0.7'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23483dff'/%3E%3Crect width='100%25' height='100%25' fill='url(%23pattern)'/%3E%3C/svg%3E");
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #9699AA;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .checkbox-custom.checked {
+            background-color: #483EFF;
+            border-color: #483EFF;
+        }
+
+        .checkbox-custom.checked::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-[940px] flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <div class="sidebar-bg md:w-[274px] p-8 rounded-lg">
+            <div class="flex md:flex-col gap-4 justify-center md:justify-start">
+                <!-- Step circles will be dynamically styled -->
+                <div class="flex items-center gap-4">
+                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center border border-white text-white" data-step="1">1</div>
+                    <div class="hidden md:block">
+                        <p class="text-[#ABBCFF] text-xs">STEP 1</p>
+                        <p class="text-white font-bold">YOUR INFO</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center border border-white text-white" data-step="2">2</div>
+                    <div class="hidden md:block">
+                        <p class="text-[#ABBCFF] text-xs">STEP 2</p>
+                        <p class="text-white font-bold">SELECT PLAN</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center border border-white text-white" data-step="3">3</div>
+                    <div class="hidden md:block">
+                        <p class="text-[#ABBCFF] text-xs">STEP 3</p>
+                        <p class="text-white font-bold">ADD-ONS</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="step-circle w-8 h-8 rounded-full flex items-center justify-center border border-white text-white" data-step="4">4</div>
+                    <div class="hidden md:block">
+                        <p class="text-[#ABBCFF] text-xs">STEP 4</p>
+                        <p class="text-white font-bold">SUMMARY</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 p-6 md:p-10">
+            <!-- Step 1: Personal Info -->
+            <div class="step-content active" id="step1">
+                <div class="max-w-[450px]">
+                    <h1 class="text-2xl md:text-3xl font-bold text-[#022959] mb-2">Personal info</h1>
+                    <p class="text-[#9699AA] mb-8">Please provide your name, email address, and phone number.</p>
+
+                    <form id="personalInfoForm" class="space-y-4">
+                        <div>
+                            <div class="flex justify-between">
+                                <label for="name" class="text-sm text-[#022959] font-medium">Name</label>
+                                <span id="nameError" class="error-message">This field is required</span>
+                            </div>
+                            <input type="text" id="name" placeholder="e.g. Vanessa Mint" 
+                                class="w-full mt-1 px-4 py-3 rounded-lg border border-[#D6D9E6] focus:outline-none focus:border-[#483EFF]">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between">
+                                <label for="email" class="text-sm text-[#022959] font-medium">Email Address</label>
+                                <span id="emailError" class="error-message">This field is required</span>
+                            </div>
+                            <input type="email" id="email" placeholder="e.g. vanessamint@email.com"
+                                class="w-full mt-1 px-4 py-3 rounded-lg border border-[#D6D9E6] focus:outline-none focus:border-[#483EFF]">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between">
+                                <label for="phone" class="text-sm text-[#022959] font-medium">Phone Number</label>
+                                <span id="phoneError" class="error-message">This field is required</span>
+                            </div>
+                            <input type="tel" id="phone" placeholder="e.g. +1 234 567 890"
+                                class="w-full mt-1 px-4 py-3 rounded-lg border border-[#D6D9E6] focus:outline-none focus:border-[#483EFF]">
+                        </div>
+                    </form>
+
+                    <div class="mt-auto pt-8 flex justify-end">
+                        <button onclick="nextStep(1)" class="bg-[#022959] text-white px-6 py-3 rounded-lg hover:bg-[#164A8A] transition-colors">
+                            Next Step
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Plan -->
+            <div class="step-content" id="step2">
+                <div class="max-w-[450px]">
+                    <h1 class="text-2xl md:text-3xl font-bold text-[#022959] mb-2">Select your plan</h1>
+                    <p class="text-[#9699AA] mb-8">You have the option of monthly or yearly billing.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+                        <!-- Arcade -->
+                        <div class="plan-card border rounded-lg p-4" data-plan="arcade">
+                            <div class="w-10 h-10 rounded-full bg-[#FFAF7E] flex items-center justify-center mb-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><g fill="none" fill-rule="evenodd"><circle cx="20" cy="20" r="20" fill="#FFAF7E"/><path fill="#FFF" fill-rule="nonzero" d="M24.995 18.005h-3.998v5.998h-2v-5.998H15a1 1 0 0 0-1 1V29a1 1 0 0 0 1 1h9.995a1 1 0 0 0 1-1v-9.995a1 1 0 0 0-1-1Zm-5.997 8.996h-2v-1.999h2v2Zm2-11.175a2.999 2.999 0 1 0-2 0v2.18h2v-2.18Z"/></g></svg>
+                            </div>
+                            <h2 class="text-[#022959] font-medium mb-1">Arcade</h2>
+                            <p class="text-[#9699AA] text-sm" id="arcade-price">$9/mo</p>
+                            <p class="text-[#022959] text-sm mt-1 yearly-offer hidden">2 months free</p>
+                        </div>
+
+                        <!-- Advanced -->
+                        <div class="plan-card border rounded-lg p-4" data-plan="advanced">
+                            <div class="w-10 h-10 rounded-full bg-[#F9818E] flex items-center justify-center mb-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><g fill="none" fill-rule="evenodd"><circle cx="20" cy="20" r="20" fill="#F9818E"/><path fill="#FFF" fill-rule="nonzero" d="M25.057 15H14.944C12.212 15 10 17.03 10 19.885c0 2.857 2.212 4.936 4.944 4.936h10.113c2.733 0 4.943-2.08 4.943-4.936S27.79 15 25.057 15ZM17.5 20.388c0 .12-.108.237-.234.237h-1.552v1.569c0 .126-.138.217-.259.217H14.5c-.118 0-.213-.086-.213-.203v-1.583h-1.569c-.126 0-.217-.139-.217-.26v-.956c0-.117.086-.213.202-.213h1.584v-1.554c0-.125.082-.231.203-.231h.989c.12 0 .236.108.236.234v1.551h1.555c.125 0 .231.083.231.204v.988Zm5.347.393a.862.862 0 0 1-.869-.855c0-.472.39-.856.869-.856.481 0 .87.384.87.856 0 .471-.389.855-.87.855Zm1.9 1.866a.86.86 0 0 1-.87-.852.86.86 0 0 1 .87-.855c.48 0 .87.38.87.855a.86.86 0 0 1-.87.852Zm0-3.736a.862.862 0 0 1-.87-.854c0-.472.39-.856.87-.856s.87.384.87.856a.862.862 0 0 1-.87.854Zm1.899 1.87a.862.862 0 0 1-.868-.855c0-.472.389-.856.868-.856s.868.384.868.856a.862.862 0 0 1-.868.855Z"/></g></svg>
+                            </div>
+                            <h2 class="text-[#022959] font-medium mb-1">Advanced</h2>
+                            <p class="text-[#9699AA] text-sm" id="advanced-price">$12/mo</p>
+                            <p class="text-[#022959] text-sm mt-1 yearly-offer hidden">2 months free</p>
+                        </div>
+
+                        <!-- Pro -->
+                        <div class="plan-card border rounded-lg p-4" data-plan="pro">
+                            <div class="w-10 h-10 rounded-full bg-[#483EFF] flex items-center justify-center mb-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><g fill="none" fill-rule="evenodd"><circle cx="20" cy="20" r="20" fill="#483EFF"/><path fill="#FFF" fill-rule="nonzero" d="M26.666 13H13.334A3.333 3.333 0 0 0 10 16.333v7.334A3.333 3.333 0 0 0 13.334 27h13.332A3.333 3.333 0 0 0 30 23.667v-7.334A3.333 3.333 0 0 0 26.666 13Zm0 2.667a.667.667 0 1 1 0 1.334.667.667 0 0 1 0-1.334Zm-13.332 0h7.332v1.334h-7.332v-1.334ZM30 20.067H10v-3.734h20v3.734Zm-20 3.733v-3.733h20v3.733a.667.667 0 0 1-.667.667H10.667A.667.667 0 0 1 10 23.8Zm20-3.733h-7.334v-3.734h7.334v3.734Z"/></g></svg>
+                            </div>
+                            <h2 class="text-[#022959] font-medium mb-1">Pro</h2>
+                            <p class="text-[#9699AA] text-sm" id="pro-price">$15/mo</p>
+                            <p class="text-[#022959] text-sm mt-1 yearly-offer hidden">2 months free</p>
+                        </div>
+                    </div>
+
+                    <!-- Billing Toggle -->
+                    <div class="bg-[#F8F9FF] rounded-lg p-3 flex justify-center items-center gap-6">
+                        <span class="text-[#022959] font-medium billing-text" id="monthly-text">Monthly</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="billing-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="text-[#9699AA] font-medium billing-text" id="yearly-text">Yearly</span>
+                    </div>
+
+                    <div class="mt-8 flex justify-between">
+                        <button onclick="prevStep(2)" class="text-[#9699AA] hover:text-[#022959] transition-colors">
+                            Go Back
+                        </button>
+                        <button onclick="nextStep(2)" class="bg-[#022959] text-white px-6 py-3 rounded-lg hover:bg-[#164A8A] transition-colors">
+                            Next Step
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Add-ons -->
+            <div class="step-content" id="step3">
+                <div class="max-w-[450px]">
+                    <h1 class="text-2xl md:text-3xl font-bold text-[#022959] mb-2">Pick add-ons</h1>
+                    <p class="text-[#9699AA] mb-8">Add-ons help enhance your gaming experience.</p>
+
+                    <div class="space-y-4">
+                        <!-- Online Service -->
+                        <div class="addon-card border rounded-lg p-4 flex items-center" data-addon="online">
+                            <div class="checkbox-custom mr-6"></div>
+                            <div class="flex-1">
+                                <h3 class="text-[#022959] font-medium">Online service</h3>
+                                <p class="text-[#9699AA] text-sm">Access to multiplayer games</p>
+                            </div>
+                            <p class="text-[#483EFF] text-sm">+$1/mo</p>
+                        </div>
+
+                        <!-- Larger Storage -->
+                        <div class="addon-card border rounded-lg p-4 flex items-center" data-addon="storage">
+                            <div class="checkbox-custom mr-6"></div>
+                            <div class="flex-1">
+                                <h3 class="text-[#022959] font-medium">Larger storage</h3>
+                                <p class="text-[#9699AA] text-sm">Extra 1TB of cloud save</p>
+                            </div>
+                            <p class="text-[#483EFF] text-sm">+$2/mo</p>
+                        </div>
+
+                        <!-- Customizable Profile -->
+                        <div class="addon-card border rounded-lg p-4 flex items-center" data-addon="profile">
+                            <div class="checkbox-custom mr-6"></div>
+                            <div class="flex-1">
+                                <h3 class="text-[#022959] font-medium">Customizable Profile</h3>
+                                <p class="text-[#9699AA] text-sm">Custom theme on your profile</p>
+                            </div>
+                            <p class="text-[#483EFF] text-sm">+$2/mo</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-between">
+                        <button onclick="prevStep(3)" class="text-[#9699AA] hover:text-[#022959] transition-colors">
+                            Go Back
+                        </button>
+                        <button onclick="nextStep(3)" class="bg-[#022959] text-white px-6 py-3 rounded-lg hover:bg-[#164A8A] transition-colors">
+                            Next Step
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Summary -->
+            <div class="step-content" id="step4">
+                <div class="max-w-[450px]">
+                    <h1 class="text-2xl md:text-3xl font-bold text-[#022959] mb-2">Finishing up</h1>
+                    <p class="text-[#9699AA] mb-8">Double-check everything looks OK before confirming.</p>
+
+                    <div class="bg-[#F8F9FF] rounded-lg p-4">
+                        <!-- Selected plan -->
+                        <div class="flex justify-between items-center pb-3 border-b border-[#9699AA]/20">
+                            <div>
+                                <h2 class="text-[#022959] font-medium" id="selected-plan">Arcade (Monthly)</h2>
+                                <button onclick="goToStep(2)" class="text-[#9699AA] text-sm underline hover:text-[#483EFF] transition-colors">Change</button>
+                            </div>
+                            <p class="text-[#022959] font-medium" id="plan-price">$9/mo</p>
+                        </div>
+
+                        <!-- Selected add-ons -->
+                        <div id="selected-addons" class="pt-3 space-y-3">
+                            <!-- Add-ons will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="flex justify-between items-center p-4">
+                        <p class="text-[#9699AA]">Total (per month)</p>
+                        <p class="text-[#483EFF] text-xl font-bold" id="total-price">+$12/mo</p>
+                    </div>
+
+                    <div class="mt-8 flex justify-between">
+                        <button onclick="prevStep(4)" class="text-[#9699AA] hover:text-[#022959] transition-colors">
+                            Go Back
+                        </button>
+                        <button onclick="nextStep(4)" class="bg-[#483EFF] text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Thank You -->
+            <div class="step-content" id="step5">
+                <div class="max-w-[450px] text-center py-16">
+                    <div class="w-[80px] h-[80px] mx-auto mb-8 rounded-full bg-[#F9818E] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="none" stroke="#FFF" stroke-width="2" d="m13.333 20 4.334 4.334 8.666-8.667"/></svg>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-[#022959] mb-4">Thank you!</h1>
+                    <p class="text-[#9699AA]">
+                        Thanks for confirming your subscription! We hope you have fun 
+                        using our platform. If you ever need support, please feel free 
+                        to email us at support@loremgaming.com.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form data storage
+        let formData = {
+            personalInfo: {
+                name: '',
+                email: '',
+                phone: ''
+            },
+            plan: {
+                name: 'arcade',
+                price: 9,
+                isYearly: false
+            },
+            addons: []
+        };
+
+        // Prices configuration
+        const prices = {
+            plans: {
+                arcade: { monthly: 9, yearly: 90 },
+                advanced: { monthly: 12, yearly: 120 },
+                pro: { monthly: 15, yearly: 150 }
+            },
+            addons: {
+                online: { monthly: 1, yearly: 10, name: 'Online service' },
+                storage: { monthly: 2, yearly: 20, name: 'Larger storage' },
+                profile: { monthly: 2, yearly: 20, name: 'Customizable Profile' }
+            }
+        };
+
+        // Step navigation
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update step circles
+            document.querySelectorAll('.step-circle').forEach(circle => {
+                circle.classList.remove('bg-[#BEE2FD]', 'text-[#022959]');
+                if (parseInt(circle.dataset.step) === step) {
+                    circle.classList.add('bg-[#BEE2FD]', 'text-[#022959]');
+                }
+            });
+        }
+
+        function validateStep1() {
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const phone = document.getElementById('phone');
+            let isValid = true;
+
+            // Name validation
+            if (!name.value.trim()) {
+                name.classList.add('error');
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            } else {
+                name.classList.remove('error');
+                document.getElementById('nameError').style.display = 'none';
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim() || !emailRegex.test(email.value)) {
+                email.classList.add('error');
+                document.getElementById('emailError').style.display = 'block';
+                document.getElementById('emailError').textContent = !email.value.trim() ? 'This field is required' : 'Invalid email format';
+                isValid = false;
+            } else {
+                email.classList.remove('error');
+                document.getElementById('emailError').style.display = 'none';
+            }
+
+            // Phone validation
+            if (!phone.value.trim()) {
+                phone.classList.add('error');
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            } else {
+                phone.classList.remove('error');
+                document.getElementById('phoneError').style.display = 'none';
+            }
+
+            if (isValid) {
+                formData.personalInfo = {
+                    name: name.value,
+                    email: email.value,
+                    phone: phone.value
+                };
+            }
+
+            return isValid;
+        }
+
+        function nextStep(currentStep) {
+            if (currentStep === 1 && !validateStep1()) return;
+            if (currentStep < 5) {
+                showStep(currentStep + 1);
+                updateSummary();
+            }
+        }
+
+        function prevStep(currentStep) {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function goToStep(step) {
+            showStep(step);
+        }
+
+        // Plan selection
+        const planCards = document.querySelectorAll('.plan-card');
+        planCards.forEach(card => {
+            card.addEventListener('click', () => {
+                planCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                formData.plan.name = card.dataset.plan;
+                formData.plan.price = prices.plans[card.dataset.plan][formData.plan.isYearly ? 'yearly' : 'monthly'];
+                updateSummary();
+            });
+        });
+
+        // Billing toggle
+        const billingToggle = document.getElementById('billing-toggle');
+        billingToggle.addEventListener('change', () => {
+            formData.plan.isYearly = billingToggle.checked;
+            updatePrices();
+            updateSummary();
+        });
+
+        // Add-ons selection
+        const addonCards = document.querySelectorAll('.addon-card');
+        addonCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const checkbox = card.querySelector('.checkbox-custom');
+                checkbox.classList.toggle('checked');
+                card.classList.toggle('selected');
+                
+                const addonId = card.dataset.addon;
+                if (checkbox.classList.contains('checked')) {
+                    formData.addons.push({
+                        id: addonId,
+                        name: prices.addons[addonId].name,
+                        price: prices.addons[addonId][formData.plan.isYearly ? 'yearly' : 'monthly']
+                    });
+                } else {
+                    formData.addons = formData.addons.filter(addon => addon.id !== addonId);
+                }
+                updateSummary();
+            });
+        });
+
+        function updatePrices() {
+            const period = formData.plan.isYearly ? 'yearly' : 'monthly';
+            const suffix = formData.plan.isYearly ? '/yr' : '/mo';
+
+            // Update plan prices
+            document.getElementById('arcade-price').textContent = `$${prices.plans.arcade[period]}${suffix}`;
+            document.getElementById('advanced-price').textContent = `$${prices.plans.advanced[period]}${suffix}`;
+            document.getElementById('pro-price').textContent = `$${prices.plans.pro[period]}${suffix}`;
+
+            // Update add-on prices
+            addonCards.forEach(card => {
+                const addonId = card.dataset.addon;
+                const priceElement = card.querySelector('.text-[#483EFF]');
+                priceElement.textContent = `+$${prices.addons[addonId][period]}${suffix}`;
+            });
+
+            // Show/hide yearly offers
+            document.querySelectorAll('.yearly-offer').forEach(offer => {
+                offer.classList.toggle('hidden', !formData.plan.isYearly);
+            });
+
+            // Update billing text colors
+            document.getElementById('monthly-text').classList.toggle('text-[#9699AA]', formData.plan.isYearly);
+            document.getElementById('yearly-text').classList.toggle('text-[#9699AA]', !formData.plan.isYearly);
+        }
+
+        function updateSummary() {
+            const period = formData.plan.isYearly ? 'yearly' : 'monthly';
+            const suffix = formData.plan.isYearly ? 'yr' : 'mo';
+
+            // Update selected plan
+            const planName = formData.plan.name.charAt(0).toUpperCase() + formData.plan.name.slice(1);
+            document.getElementById('selected-plan').textContent = `${planName} (${period === 'yearly' ? 'Yearly' : 'Monthly'})`;
+            document.getElementById('plan-price').textContent = `$${prices.plans[formData.plan.name][period]}/${suffix}`;
+
+            // Update selected add-ons
+            const addonsContainer = document.getElementById('selected-addons');
+            addonsContainer.innerHTML = '';
+            formData.addons.forEach(addon => {
+                addonsContainer.innerHTML += `
+                    <div class="flex justify-between items-center">
+                        <p class="text-[#9699AA]">${addon.name}</p>
+                        <p class="text-[#022959]">+$${addon.price}/${suffix}</p>
+                    </div>
+                `;
+            });
+
+            // Update total
+            const planPrice = prices.plans[formData.plan.name][period];
+            const addonsTotal = formData.addons.reduce((sum, addon) => sum + addon.price, 0);
+            const total = planPrice + addonsTotal;
+            document.getElementById('total-price').textContent = `+$${total}/${suffix}`;
+        }
+
+        // Initialize the form
+        showStep(1);
+        planCards[0].classList.add('selected');
+        updatePrices();
+        updateSummary();
+    </script>
+</body>
+</html>
