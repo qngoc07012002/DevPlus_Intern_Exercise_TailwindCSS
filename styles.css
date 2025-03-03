@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+body {
+    background-color: #f0f6ff;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+.step-content {
+    display: none;
+}
+
+.step-content.active {
+    display: block;
+}
+
+.plan-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.plan-card:hover {
+    border-color: #483EFF;
+}
+
+.plan-card.selected {
+    border-color: #483EFF;
+    background-color: #f8f9ff;
+}
+
+.addon-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.addon-card:hover {
+    border-color: #483EFF;
+}
+
+.addon-card.selected {
+    border-color: #483EFF;
+    background-color: #f8f9ff;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 38px;
+    height: 20px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #022959;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(18px);
+}
+
+.error {
+    border-color: #ed3548 !important;
+}
+
+.error-message {
+    display: none;
+    color: #ed3548;
+    font-size: 14px;
+}
+
+.sidebar-bg {
+    background-color: #483EFF;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cdefs%3E%3Cpattern id='pattern' width='100%25' height='100%25' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='20%25' cy='110%25' r='30%25' fill='%23ffaf7e' opacity='0.7'/%3E%3Ccircle cx='100%25' cy='60%25' r='30%25' fill='%23f9818d' opacity='0.7'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%23483dff'/%3E%3Crect width='100%25' height='100%25' fill='url(%23pattern)'/%3E%3C/svg%3E");
+}
+
+.checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #9699AA;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+
+.checkbox-custom.checked {
+    background-color: #483EFF;
+    border-color: #483EFF;
+}
+
+.checkbox-custom.checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+} 
